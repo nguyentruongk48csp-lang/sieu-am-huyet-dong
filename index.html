@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SA huyết động">
+<meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Siêu âm tim huyết động</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: một cột dọc tối ưu cho iPhone — mỗi số đo một hàng (nhãn | ô nhập), kết quả Thất trái (đỏ) / Thất phải (xanh) bên dưới; nút In tạo phiếu PDF khổ A4 */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --line:#e1e4ea; --fg:#1b2230; --muted:#5d6676;
+  --lv:#b4363c; --lv-tint:#fbf0ef; --rv:#2a5d9f; --rv-tint:#eef3fa; --soft:#eef0f3;
+  --ok:#1a7f4b; --hi:#d0212b; --lo:#1957c9; --focus:#2a5d9f; --scrim:rgba(10,14,20,.6);
+  /* Phiếu in luôn là giấy trắng, giống nhau ở cả hai giao diện */
+  --paper:#ffffff; --ink:#111722; --ink-muted:#555e6e; --ink-line:#c9ced8; --ink-soft:#f1f3f6;
+  --p-ok:#137a43; --p-hi:#c8102e; --p-lo:#1450c4; --p-lv:#a32a30; --p-rv:#1f4f8f;
+  --f-ui:"Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --surface:#1a1f27; --line:#2c333f; --fg:#e6e9ef; --muted:#98a1b0;
+  --lv:#ec7d7f; --lv-tint:#2a1c1f; --rv:#7fb0ee; --rv-tint:#18222f; --soft:#232933;
+  --ok:#5fd394; --hi:#ff6b6b; --lo:#6aa5ff; --focus:#7fb0ee; --scrim:rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --surface:#1a1f27; --line:#2c333f; --fg:#e6e9ef; --muted:#98a1b0;
+  --lv:#ec7d7f; --lv-tint:#2a1c1f; --rv:#7fb0ee; --rv-tint:#18222f; --soft:#232933;
+  --ok:#5fd394; --hi:#ff6b6b; --lo:#6aa5ff; --focus:#7fb0ee; --scrim:rgba(0,0,0,.7); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.45;
+  padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-direction:column;gap:10px}
+h1{font-size:1.45rem;font-weight:700;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.88rem}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;font-size:.9rem;font-weight:600;border-radius:10px;padding:11px 8px;min-height:44px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg);-webkit-tap-highlight-color:transparent}
+button.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button.danger{border-color:var(--hi);color:var(--hi)}
+button:disabled{opacity:.6;cursor:default}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.panel > h2{margin:0;padding:14px 16px 6px;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.sec{padding:8px 16px 4px;font-size:.8rem;font-weight:700;letter-spacing:.03em}
+.sec.lv{color:var(--lv);background:var(--lv-tint)} .sec.rv{color:var(--rv);background:var(--rv-tint)} .sec.gr{color:var(--muted);background:var(--soft)}
+
+.f{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:center;gap:10px;padding:8px 16px;border-top:1px solid var(--line)}
+.sec + .f{border-top:0}
+.f label{font-size:.92rem;font-weight:500;line-height:1.25}
+.f label small{display:block;font-size:.74rem;font-weight:400;color:var(--muted);margin-top:2px}
+.in{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-height:44px}
+.in:focus-within{border-color:var(--focus);box-shadow:0 0 0 1px var(--focus)}
+.in input,.in select{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--fg);font:inherit;font-size:16px;padding:10px 10px;outline:none;-webkit-appearance:none;appearance:none}
+.in input.n{font-family:var(--f-num);font-variant-numeric:tabular-nums;text-align:right}
+.in .u{font-size:.74rem;color:var(--muted);padding-right:10px;white-space:nowrap}
+.derived{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 14px;border-top:1px solid var(--line)}
+.chipval{font-size:.8rem;background:var(--soft);border-radius:999px;padding:4px 11px;color:var(--muted)}
+.chipval b{font-family:var(--f-num);color:var(--fg);font-weight:600}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:0 16px 10px;font-size:.78rem;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:currentColor}
+.legend .g{color:var(--ok)} .legend .r{color:var(--hi)} .legend .b{color:var(--lo)}
+.row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,.9fr);gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.sec + .row{border-top:0}
+.row.head{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding-block:6px;border-top:0}
+.name{font-weight:600;font-size:.92rem}
+.name small{display:block;font-weight:400;color:var(--muted);font-size:.74rem;line-height:1.3}
+.val{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:1.08rem;font-weight:600}
+.val .unit{font-family:var(--f-ui);font-size:.72rem;font-weight:400;color:var(--muted);margin-left:3px}
+.val .alt{display:block;font-family:var(--f-ui);font-size:.72rem;font-weight:400;color:var(--muted)}
+.val.ok .v{color:var(--ok);font-weight:600}
+.val.hi .v{color:var(--hi);font-weight:700}
+.val.lo .v{color:var(--lo);font-weight:700}
+.val.na .v{color:var(--muted)}
+.norm{font-size:.84rem;font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.norm small{display:block;font-family:var(--f-ui);color:var(--muted);font-size:.72rem;line-height:1.3}
+.bt{font-family:var(--f-ui);font-size:.72rem;color:var(--muted)}
+@media (min-width:481px){.bt{display:none}}
+@media (max-width:480px){
+  .row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 12px}
+  .row .name{grid-column:1/-1}
+  .row.head{display:none}
+  .norm{text-align:right}
+}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:.85rem;z-index:30;max-width:calc(100% - 32px);text-align:center}
+
+/* Xem trước PDF */
+.sheet{position:fixed;inset:0;z-index:20;background:var(--scrim);display:flex;flex-direction:column}
+.sheet-bar{display:flex;gap:8px;align-items:center;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:10px;
+  padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+.sheet-bar strong{flex:1;font-size:.95rem}
+.sheet-bar button{min-width:84px}
+.sheet-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:16px max(14px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+.sheet-body img{display:block;width:100%;max-width:720px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.35);background:var(--paper)}
+.sheet-msg{color:var(--paper);text-align:center;padding:40px 0;font-size:.9rem}
+
+/* Phiếu in (ẩn ngoài màn hình, dùng để dựng PDF) */
+#report{position:fixed;left:-10000px;top:0;width:794px;background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:13px;line-height:1.4;padding:44px 48px}
+#report h1{font-size:22px;letter-spacing:.04em;text-align:center;margin:0 0 4px;color:var(--ink)}
+#report .date{text-align:center;color:var(--ink-muted);font-size:12px;margin-bottom:18px}
+#report h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px;color:var(--ink-muted)}
+#report table{width:100%;border-collapse:collapse}
+#report td,#report th{border:1px solid var(--ink-line);padding:5px 8px;text-align:left;vertical-align:middle}
+#report th{background:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-muted);font-weight:600}
+#report .info td{border:0;padding:3px 0}
+#report .info b{font-weight:600}
+#report .num{font-family:var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+#report .side{font-weight:700;text-align:center;width:90px;letter-spacing:.04em}
+#report .side.lv{color:var(--p-lv)} #report .side.rv{color:var(--p-rv)}
+#report .r-ok{color:var(--p-ok);font-weight:600}
+#report .r-hi{color:var(--p-hi);font-weight:700}
+#report .r-lo{color:var(--p-lo);font-weight:700}
+#report .r-na{color:var(--ink-muted)}
+#report .muted{color:var(--ink-muted);font-size:11px}
+#report .meas{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+#report .sign{display:flex;justify-content:flex-end;margin-top:28px}
+#report .sign div{text-align:center;width:240px}
+#report .sign .sp{height:70px}
+#report .legend-p{font-size:11px;color:var(--ink-muted);margin-top:6px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Siêu âm tim huyết động</h1>
+      <p class="sub">Nhập lần lượt từ trên xuống, kết quả tự tính ở cuối trang.</p>
+    </div>
+    <div class="actions">
+      <button id="btnClear" type="button">Nhập mới</button>
+      <button id="btnPrint" type="button" class="primary">In</button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>Bệnh nhân &amp; lâm sàng</h2>
+    <div class="f"><label for="name">Họ và tên</label><div class="in"><input id="name" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next"></div></div>
+    <div class="f"><label for="bed">Giường số</label><div class="in"><input id="bed" class="n" type="text" autocomplete="off" enterkeyhint="next"></div></div>
+    <div class="f"><label for="age">Tuổi</label><div class="in"><input id="age" class="n" type="text" inputmode="numeric" enterkeyhint="next"><span class="u">tuổi</span></div></div>
+    <div class="f"><label for="sex">Giới</label><div class="in"><select id="sex"><option value="">Chọn</option><option>Nam</option><option>Nữ</option></select><span class="u">▾</span></div></div>
+    <div class="f"><label for="height">Chiều cao</label><div class="in"><input id="height" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm</span></div></div>
+    <div class="f"><label for="weight">Cân nặng</label><div class="in"><input id="weight" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">kg</span></div></div>
+    <div class="f"><label for="hr">Nhịp tim</label><div class="in"><input id="hr" class="n" type="text" inputmode="numeric" enterkeyhint="next"><span class="u">ck/ph</span></div></div>
+    <div class="f"><label for="sbp">HA tâm thu</label><div class="in"><input id="sbp" class="n" type="text" inputmode="numeric" enterkeyhint="next"><span class="u">mmHg</span></div></div>
+    <div class="f"><label for="dbp">HA tâm trương</label><div class="in"><input id="dbp" class="n" type="text" inputmode="numeric" enterkeyhint="next"><span class="u">mmHg</span></div></div>
+    <div class="derived">
+      <span class="chipval">BSA <b id="dBSA">—</b> m²</span>
+      <span class="chipval">MAP <b id="dMAP">—</b> mmHg · BT 70–105</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Số đo siêu âm</h2>
+    <div class="sec lv">LVOT</div>
+    <div class="f"><label for="lvotD">LVOT diam<small>BT 18–22</small></label><div class="in"><input id="lvotD" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">mm</span></div></div>
+    <div class="f"><label for="lvotVTI">LVOT VTI<small>BT 18–22</small></label><div class="in"><input id="lvotVTI" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm</span></div></div>
+    <div class="sec rv">RVOT</div>
+    <div class="f"><label for="rvotD">RVOT diam<small>BT 17–27</small></label><div class="in"><input id="rvotD" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">mm</span></div></div>
+    <div class="f"><label for="rvotVTI">RVOT VTI<small>BT ≥ 15</small></label><div class="in"><input id="rvotVTI" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm</span></div></div>
+    <div class="sec gr">Tâm trương &amp; hở ba lá</div>
+    <div class="f"><label for="E">Sóng E</label><div class="in"><input id="E" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm/s</span></div></div>
+    <div class="f"><label for="A">Sóng A<small>E/A BT 0,8–2</small></label><div class="in"><input id="A" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm/s</span></div></div>
+    <div class="f"><label for="eSep">e’ vách<small>BT ≥ 7</small></label><div class="in"><input id="eSep" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm/s</span></div></div>
+    <div class="f"><label for="eLat">e’ bên<small>BT ≥ 10</small></label><div class="in"><input id="eLat" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm/s</span></div></div>
+    <div class="f"><label for="trv">TRVmax<small>BT ≤ 2,8</small></label><div class="in"><input id="trv" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">m/s</span></div></div>
+    <div class="f"><label for="lavi">LAVi (tuỳ chọn)<small>BT ≤ 34</small></label><div class="in"><input id="lavi" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">mL/m²</span></div></div>
+    <div class="sec gr">TM chủ dưới</div>
+    <div class="f"><label for="ivcMax">IVC thở ra<small>BT ≤ 21</small></label><div class="in"><input id="ivcMax" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">mm</span></div></div>
+    <div class="f"><label for="ivcMin">IVC hít vào<small>Xẹp BT &gt; 50%</small></label><div class="in"><input id="ivcMin" class="n" type="text" inputmode="decimal" enterkeyhint="done"><span class="u">mm</span></div></div>
+    <div class="derived">
+      <span class="chipval">E/A <b id="dEA">—</b></span>
+      <span class="chipval">e’ TB <b id="dEavg">—</b></span>
+      <span class="chipval">E/e’ TB <b id="dEe">—</b> · BT ≤ 14</span>
+      <span class="chipval">Xẹp IVC <b id="dCol">—</b></span>
+      <span class="chipval">PASP <b id="dPASP">—</b> mmHg · BT ≤ 35</span>
+    </div>
+  </section>
+
+  <section class="panel" id="ketqua">
+    <h2>Kết quả</h2>
+    <div class="legend"><span class="g">Bình thường</span><span class="r">Cao</span><span class="b">Thấp</span></div>
+    <div id="res"></div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Xem trước PDF">
+  <div class="sheet-bar">
+    <button id="btnClose" type="button">Đóng</button>
+    <strong>Bản PDF</strong>
+    <button id="btnSave" type="button" class="primary">Lưu PDF</button>
+  </div>
+  <div class="sheet-body" id="sheetBody"><p class="sheet-msg">Đang tạo bản PDF…</p></div>
+</div>
+<div id="report" aria-hidden="true"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const IDS = ["name","bed","age","sex","height","weight","hr","sbp","dbp","lvotD","lvotVTI","rvotD","rvotVTI","E","A","eSep","eLat","trv","lavi","ivcMax","ivcMin"];
+
+const num = id => { const s = String($(id).value).trim().replace(",", "."); if (s==="") return null; const v = parseFloat(s); return isFinite(v) ? v : null; };
+const fmt = (v, d=1) => v==null || !isFinite(v) ? "—" : v.toLocaleString("vi-VN",{minimumFractionDigits:d,maximumFractionDigits:d});
+const ok = (...xs) => xs.every(x => x!=null && isFinite(x));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function judge(v, lo, hi){
+  if (v==null || !isFinite(v)) return "na";
+  if (lo!=null && v < lo) return "lo";
+  if (hi!=null && v > hi) return "hi";
+  return "ok";
+}
+
+function compute(){
+  const h=num("height"), w=num("weight"), hr=num("hr"), sbp=num("sbp"), dbp=num("dbp");
+  const bsa = ok(h,w) ? Math.sqrt(h*w/3600) : null;
+  const map = ok(sbp,dbp) ? (sbp+2*dbp)/3 : null;
+
+  const mm = id => { const v = num(id); return v==null ? null : v/10; }; // mm → cm
+  const lvD=mm("lvotD"), lvV=num("lvotVTI"), rvD=mm("rvotD"), rvV=num("rvotVTI");
+  const lvSV = ok(lvD,lvV) ? Math.PI*(lvD/2)**2*lvV : null;
+  const rvSV = ok(rvD,rvV) ? Math.PI*(rvD/2)**2*rvV : null;
+  const lvSVi = ok(lvSV,bsa) ? lvSV/bsa : null, rvSVi = ok(rvSV,bsa) ? rvSV/bsa : null;
+  const lvCO = ok(lvSV,hr) ? lvSV*hr/1000 : null, rvCO = ok(rvSV,hr) ? rvSV*hr/1000 : null;
+  const lvCI = ok(lvCO,bsa) ? lvCO/bsa : null, rvCI = ok(rvCO,bsa) ? rvCO/bsa : null;
+
+  const iMax=mm("ivcMax"), iMin=mm("ivcMin");
+  const col = ok(iMax,iMin) && iMax>0 ? (iMax-iMin)/iMax*100 : null;
+  let rap=null, rapRange="";
+  if (ok(iMax,col)){
+    if (iMax<=2.1 && col>50){rap=3;rapRange="0–5"}
+    else if (iMax>2.1 && col<50){rap=15;rapRange="10–20"}
+    else {rap=8;rapRange="5–10"}
+  }
+
+  const svr = ok(map,rap,lvCO) && lvCO>0 ? 80*(map-rap)/lvCO : null;
+  const svri = ok(svr,bsa) ? svr*bsa : null;
+
+  const E=num("E"), A=num("A"), es=num("eSep"), el=num("eLat"), trv=num("trv"), lavi=num("lavi");
+  const ea = ok(E,A) && A>0 ? E/A : null;
+  const ePrimes = [es,el].filter(x=>x!=null && x>0);
+  const eavg = ePrimes.length ? ePrimes.reduce((a,b)=>a+b,0)/ePrimes.length : null;
+  const Ee = ok(E,eavg) ? E/eavg : null;
+  const lvedp = Ee!=null ? 4.9+0.62*Ee : null;
+  const lapNag = Ee!=null ? 1.9+1.24*Ee : null;
+  const pasp = ok(trv,rap) ? 4*trv*trv+rap : null;
+
+  let lapCls="na", lapTxt="Chưa đủ dữ liệu";
+  if (ea!=null && E!=null){
+    if (ea<=0.8 && E<=50){lapCls="ok";lapTxt="ASE: bình thường"}
+    else if (ea>=2){lapCls="hi";lapTxt="ASE: tăng"}
+    else {
+      const crit=[];
+      if (Ee!=null) crit.push(Ee>14);
+      if (trv!=null) crit.push(trv>2.8);
+      if (lavi!=null) crit.push(lavi>34);
+      const pos=crit.filter(Boolean).length, neg=crit.length-pos;
+      if (crit.length<2){lapCls="na";lapTxt="ASE: cần thêm tiêu chí"}
+      else if (crit.length===2){ if(pos===2){lapCls="hi";lapTxt="ASE: tăng"} else if(neg===2){lapCls="ok";lapTxt="ASE: bình thường"} else {lapCls="na";lapTxt="ASE: không xác định"} }
+      else { if(pos>=2){lapCls="hi";lapTxt="ASE: tăng"} else {lapCls="ok";lapTxt="ASE: bình thường"} }
+    }
+  }
+
+  const pvr = ok(trv,rvV) && rvV>0 ? 10*trv/rvV+0.16 : null;
+  const pvri = ok(pvr,bsa) ? pvr*bsa : null;
+
+  $("dBSA").textContent=fmt(bsa,2); $("dMAP").textContent=fmt(map,0);
+  $("dEA").textContent=fmt(ea,2); $("dEavg").textContent=fmt(eavg,1); $("dEe").textContent=fmt(Ee,1);
+  $("dCol").textContent=col==null?"—":fmt(col,0)+"%"; $("dPASP").textContent=fmt(pasp,0);
+
+  const LV = [
+    {k:"LVOT VTI", v:lvV, d:1, u:"cm", n:"18–22", lo:18, hi:22},
+    {k:"LV-SVi", sub:`SV = ${fmt(lvSV,0)} mL`, v:lvSVi, d:1, u:"mL/m²", n:"35–65", lo:35, hi:65},
+    {k:"LV-CI", sub:`CO = ${fmt(lvCO,2)} L/ph`, v:lvCI, d:2, u:"L/ph/m²", n:"2,5–4,0", nsub:"CO 4–8 L/ph", lo:2.5, hi:4.0},
+    {k:"SVRi", sub:"Chỉ số sức cản mạch hệ thống", v:svri, d:0, u:"dyn·s·cm⁻⁵·m²", n:"1970–2390", lo:1970, hi:2390},
+    {k:"LV-EDP", sub:"Áp lực thất trái cuối tâm trương", v:lvedp, d:1, u:"mmHg", n:"≤ 12", lo:null, hi:12},
+    {k:"LAP", sub:"Áp lực nhĩ trái", v:lapNag, d:1, u:"mmHg", alt:lapTxt, n:"≤ 15", nsub:"Theo ASE 2016", cls:lapCls},
+  ];
+  const RV = [
+    {k:"RVOT VTI", v:rvV, d:1, u:"cm", n:"≥ 15", lo:15, hi:null},
+    {k:"RV-SVi", sub:`SV = ${fmt(rvSV,0)} mL`, v:rvSVi, d:1, u:"mL/m²", n:"35–65", lo:35, hi:65},
+    {k:"RV-CI", sub:`CO = ${fmt(rvCO,2)} L/ph`, v:rvCI, d:2, u:"L/ph/m²", n:"2,5–4,0", lo:2.5, hi:4.0},
+    {k:"PVRi", sub:"Chỉ số sức cản mạch phổi", v:pvri, d:2, u:"Wood·m²", alt: pvri!=null?`${fmt(pvri*80,0)} dyn·s·cm⁻⁵·m²`:"", n:"< 3", lo:null, hi:3},
+    {k:"RAP", sub:"Áp lực nhĩ phải", v:rap, d:0, u:"mmHg", alt: rap!=null?`Khoảng ${rapRange}`:"", n:"3 (0–5)", lo:null, hi:5},
+  ];
+  render(LV,RV);
+  window.__res = {bsa,map,LV,RV,ea,eavg,Ee,col,pasp};
+}
+
+function rowHTML(r){
+  const cls = r.cls || judge(r.v, r.lo, r.hi);
+  return `<div class="row">
+    <div class="name">${r.k}${r.sub?`<small>${r.sub}</small>`:""}</div>
+    <div class="val ${cls}"><span class="v">${fmt(r.v,r.d)}</span><span class="unit">${r.u}</span>${r.alt?`<span class="alt">${r.alt}</span>`:""}</div>
+    <div class="norm"><span class="bt">BT </span>${r.n}${r.nsub?`<small>${r.nsub}</small>`:""}</div>
+  </div>`;
+}
+function render(LV,RV){
+  const head = `<div class="row head"><div>Chỉ số</div><div>Kết quả</div><div>Bình thường</div></div>`;
+  $("res").innerHTML =
+    `<div class="sec lv">THẤT TRÁI</div>${head}${LV.map(rowHTML).join("")}
+     <div class="sec rv">THẤT PHẢI</div>${head}${RV.map(rowHTML).join("")}`;
+}
+
+IDS.forEach(id => { $(id).addEventListener("input", compute); $(id).addEventListener("change", compute); });
+
+const inputs = IDS.map($).filter(el => el.tagName === "INPUT");
+inputs.forEach((el,i) => el.addEventListener("keydown", e => {
+  if (e.key === "Enter"){ e.preventDefault(); const nx = inputs[i+1]; if (nx) nx.focus(); else { el.blur(); $("ketqua").scrollIntoView({behavior:"smooth"}); } }
+}));
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(t._h); t._h=setTimeout(()=>t.hidden=true,2400); }
+
+// Nhập mới: chạm hai lần để tránh xoá nhầm
+let clearArmed = null;
+$("btnClear").onclick = () => {
+  const b = $("btnClear");
+  if (!clearArmed){
+    b.textContent = "Chạm lần nữa để xoá"; b.classList.add("danger");
+    clearArmed = setTimeout(() => { clearArmed=null; b.textContent="Nhập mới"; b.classList.remove("danger"); }, 3000);
+    return;
+  }
+  clearTimeout(clearArmed); clearArmed=null; b.textContent="Nhập mới"; b.classList.remove("danger");
+  IDS.forEach(id => { $(id).value = ""; }); compute(); window.scrollTo({top:0}); toast("Đã xoá, sẵn sàng nhập bệnh nhân mới");
+};
+
+/* ---------- Phiếu in & PDF ---------- */
+function todayStr(){ const d=new Date(); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; }
+function buildReport(){
+  const R = window.__res, g = id => esc($(id).value.trim() || "—");
+  const resRows = (list, side, label) => list.map((r,i) => {
+    const c = r.cls || judge(r.v,r.lo,r.hi);
+    return `<tr>${i===0?`<td class="side ${side}" rowspan="${list.length}">${label}</td>`:""}
+      <td><b>${r.k}</b>${r.sub?`<div class="muted">${r.sub}</div>`:""}</td>
+      <td class="num r-${c}">${fmt(r.v,r.d)}</td>
+      <td>${r.u}${r.alt?`<div class="muted">${r.alt}</div>`:""}</td>
+      <td class="num">${r.n}</td></tr>`;
+  }).join("");
+  const m = (label, val, unit, nr) => `<tr><td>${label}</td><td class="num">${val}</td><td>${unit}</td><td class="num muted">${nr}</td></tr>`;
+  const v = id => esc($(id).value.trim() || "—");
+  $("report").innerHTML = `
+    <h1>SIÊU ÂM TIM HUYẾT ĐỘNG</h1>
+    <div class="date">Ngày ${todayStr()}</div>
+    <table class="info"><tr>
+      <td style="width:50%">Họ và tên: <b>${g("name")}</b></td>
+      <td style="width:18%">Giường: <b>${g("bed")}</b></td>
+      <td style="width:16%">Tuổi: <b>${g("age")}</b></td>
+      <td style="width:16%">Giới: <b>${g("sex")}</b></td></tr>
+      <tr><td>Chiều cao: <b>${g("height")}</b> cm &nbsp; Cân nặng: <b>${g("weight")}</b> kg</td>
+      <td colspan="3">BSA: <b>${fmt(R.bsa,2)}</b> m²</td></tr>
+      <tr><td>Nhịp tim: <b>${g("hr")}</b> ck/ph &nbsp; HA: <b>${g("sbp")}/${g("dbp")}</b> mmHg</td>
+      <td colspan="3">HA trung bình: <b>${fmt(R.map,0)}</b> mmHg</td></tr>
+    </table>
+
+    <h3>Số đo siêu âm</h3>
+    <div class="meas">
+      <table><tr><th>Thông số</th><th>Giá trị</th><th>Đơn vị</th><th>BT</th></tr>
+        ${m("LVOT diam", v("lvotD"), "mm", "18–22")}
+        ${m("LVOT VTI", v("lvotVTI"), "cm", "18–22")}
+        ${m("RVOT diam", v("rvotD"), "mm", "17–27")}
+        ${m("RVOT VTI", v("rvotVTI"), "cm", "≥ 15")}
+        ${m("IVC thở ra", v("ivcMax"), "mm", "≤ 21")}
+        ${m("IVC hít vào", v("ivcMin"), "mm", "")}
+        ${m("% xẹp IVC", R.col==null?"—":fmt(R.col,0), "%", "> 50")}
+      </table>
+      <table><tr><th>Thông số</th><th>Giá trị</th><th>Đơn vị</th><th>BT</th></tr>
+        ${m("E", v("E"), "cm/s", "")}
+        ${m("A", v("A"), "cm/s", "")}
+        ${m("E/A", fmt(R.ea,2), "", "0,8–2")}
+        ${m("e’ vách / bên", `${v("eSep")} / ${v("eLat")}`, "cm/s", "≥ 7 / ≥ 10")}
+        ${m("E/e’ TB", fmt(R.Ee,1), "", "≤ 14")}
+        ${m("TRVmax", v("trv"), "m/s", "≤ 2,8")}
+        ${m("PASP", fmt(R.pasp,0), "mmHg", "≤ 35")}
+      </table>
+    </div>
+
+    <h3>Kết quả huyết động</h3>
+    <table>
+      <tr><th></th><th>Chỉ số</th><th>Kết quả</th><th>Đơn vị</th><th>Bình thường</th></tr>
+      ${resRows(R.LV,"lv","THẤT<br>TRÁI")}
+      ${resRows(R.RV,"rv","THẤT<br>PHẢI")}
+    </table>
+    <div class="legend-p"><span class="r-ok">■ Bình thường</span> &nbsp; <span class="r-hi">■ Cao</span> &nbsp; <span class="r-lo">■ Thấp</span></div>
+
+    <div class="sign"><div>Bác sĩ siêu âm<div class="sp"></div><div class="muted">(Ký, ghi rõ họ tên)</div></div></div>`;
+}
+
+let pdfBlob = null, pdfName = "";
+function slug(s){ return (s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+
+async function makePDF(){
+  buildReport();
+  try { await document.fonts.ready; } catch(e){}
+  const canvas = await html2canvas($("report"), {scale:2, backgroundColor:"#ffffff", useCORS:true, logging:false});
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:"p", unit:"mm", format:"a4"});
+  const pw = 210, ph = 297;
+  let w = pw, h = canvas.height * pw / canvas.width;
+  if (h > ph){ h = ph; w = canvas.width * ph / canvas.height; }
+  const img = canvas.toDataURL("image/jpeg", 0.92);
+  doc.addImage(img, "JPEG", (pw-w)/2, 0, w, h);
+  pdfBlob = doc.output("blob");
+  const d = new Date();
+  pdfName = `SA-tim-huyet-dong_${slug($("name").value) || "benh-nhan"}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.pdf`;
+  return img;
+}
+
+let downloadsP = null;
+function getDownloads(){ if (!downloadsP) downloadsP = (window.claude?.use ? window.claude.use("downloads") : Promise.resolve(null)).catch(()=>null); return downloadsP; }
+
+async function savePDF(){
+  if (!pdfBlob) return;
+  const dl = await getDownloads();
+  if (!dl){
+    // Ngoài Claude (bản cài trên iPhone): dùng bảng chia sẻ của iOS, hoặc tải file trực tiếp
+    const file = new File([pdfBlob], pdfName, {type:"application/pdf"});
+    try {
+      if (navigator.canShare && navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:pdfName}); return; }
+    } catch(e){ if (e && e.name === "AbortError") return; }
+    try {
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a"); a.href = url; a.download = pdfName; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch(e){ toast("Không lưu được file. Chạm giữ vào ảnh phiếu để lưu."); }
+    return;
+  }
+  try { await dl.save({filename: pdfName, data: pdfBlob}); toast("Đã lưu PDF"); }
+  catch(e){
+    if (e && e.code === "declined") toast("Đã huỷ lưu PDF");
+    else if (e && e.code === "rate_limited") toast("Đang có một hộp thoại lưu mở, vui lòng thử lại");
+    else toast("Không lưu được PDF ở chế độ xem này");
+  }
+}
+
+$("btnPrint").onclick = async () => {
+  const sheet = $("sheet"), body = $("sheetBody"), btn = $("btnPrint");
+  if (!window.html2canvas || !window.jspdf){ toast("Chưa tải xong công cụ tạo PDF, vui lòng thử lại"); return; }
+  body.innerHTML = `<p class="sheet-msg">Đang tạo bản PDF…</p>`;
+  sheet.hidden = false; document.body.style.overflow = "hidden"; btn.disabled = true; $("btnSave").disabled = true;
+  try {
+    const img = await makePDF();
+    body.innerHTML = `<img alt="Phiếu siêu âm tim huyết động" src="${img}">`;
+    $("btnSave").disabled = false;
+    if (await getDownloads()) savePDF(); // trong Claude: hỏi lưu ngay; ngoài Claude: chờ bấm "Lưu PDF"
+  } catch(e){
+    body.innerHTML = `<p class="sheet-msg">Không tạo được PDF. Vui lòng thử lại.</p>`;
+  } finally { btn.disabled = false; }
+};
+$("btnSave").onclick = savePDF;
+$("btnClose").onclick = () => { $("sheet").hidden = true; document.body.style.overflow = ""; };
+
+getDownloads();
+compute();
+</script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body>
+</html>
