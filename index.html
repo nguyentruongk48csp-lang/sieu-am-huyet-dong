@@ -71,6 +71,13 @@ button:disabled{opacity:.6;cursor:default}
 .in input,.in select{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--fg);font:inherit;font-size:16px;padding:10px 10px;outline:none;-webkit-appearance:none;appearance:none}
 .in input.n{font-family:var(--f-num);font-variant-numeric:tabular-nums;text-align:right}
 .in .u{font-size:.74rem;color:var(--muted);padding-right:10px;white-space:nowrap}
+.f .lbl{font-size:.92rem;font-weight:500}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg .opt{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:400;color:var(--muted);background:var(--bg);border:1px solid var(--line);font-size:16px;padding:8px}
+.seg .box{width:18px;height:18px;border:2px solid var(--line);border-radius:5px;display:inline-grid;place-items:center;flex:none}
+.seg .opt[aria-pressed="true"]{font-weight:700;color:var(--fg);border-color:var(--fg);background:var(--surface);box-shadow:0 0 0 1px var(--fg)}
+.seg .opt[aria-pressed="true"] .box{background:var(--fg);border-color:var(--fg)}
+.seg .opt[aria-pressed="true"] .box::after{content:"";width:5px;height:9px;border:solid var(--surface);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
 .derived{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 14px;border-top:1px solid var(--line)}
 .chipval{font-size:.8rem;background:var(--soft);border-radius:999px;padding:4px 11px;color:var(--muted)}
 .chipval b{font-family:var(--f-num);color:var(--fg);font-weight:600}
@@ -155,7 +162,7 @@ button:disabled{opacity:.6;cursor:default}
     <div class="f"><label for="name">Họ và tên</label><div class="in"><input id="name" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next"></div></div>
     <div class="f"><label for="bed">Giường số</label><div class="in"><input id="bed" class="n" type="text" autocomplete="off" enterkeyhint="next"></div></div>
     <div class="f"><label for="age">Tuổi</label><div class="in"><input id="age" class="n" type="text" inputmode="numeric" enterkeyhint="next"><span class="u">tuổi</span></div></div>
-    <div class="f"><label for="sex">Giới</label><div class="in"><select id="sex"><option value="">Chọn</option><option>Nam</option><option>Nữ</option></select><span class="u">▾</span></div></div>
+    <div class="f"><span class="lbl" id="sexLbl">Giới</span><div class="seg" role="group" aria-labelledby="sexLbl"><input type="hidden" id="sex"><button type="button" class="opt" data-v="Nam" aria-pressed="false"><span class="box"></span>Nam</button><button type="button" class="opt" data-v="Nữ" aria-pressed="false"><span class="box"></span>Nữ</button></div></div>
     <div class="f"><label for="height">Chiều cao</label><div class="in"><input id="height" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">cm</span></div></div>
     <div class="f"><label for="weight">Cân nặng</label><div class="in"><input id="weight" class="n" type="text" inputmode="decimal" enterkeyhint="next"><span class="u">kg</span></div></div>
     <div class="f"><label for="hr">Nhịp tim</label><div class="in"><input id="hr" class="n" type="text" inputmode="numeric" enterkeyhint="next"><span class="u">ck/ph</span></div></div>
@@ -230,7 +237,12 @@ function judge(v, lo, hi){
   return "ok";
 }
 
+function syncSex(){ document.querySelectorAll(".seg .opt").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === $("sex").value))); }
+document.querySelectorAll(".seg .opt").forEach(b => b.addEventListener("click", () => {
+  $("sex").value = ($("sex").value === b.dataset.v) ? "" : b.dataset.v; compute();
+}));
 function compute(){
+  syncSex();
   const h=num("height"), w=num("weight"), hr=num("hr"), sbp=num("sbp"), dbp=num("dbp");
   const bsa = ok(h,w) ? Math.sqrt(h*w/3600) : null;
   const map = ok(sbp,dbp) ? (sbp+2*dbp)/3 : null;
@@ -323,7 +335,7 @@ function render(LV,RV){
 
 IDS.forEach(id => { $(id).addEventListener("input", compute); $(id).addEventListener("change", compute); });
 
-const inputs = IDS.map($).filter(el => el.tagName === "INPUT");
+const inputs = IDS.map($).filter(el => el.tagName === "INPUT" && el.type !== "hidden");
 inputs.forEach((el,i) => el.addEventListener("keydown", e => {
   if (e.key === "Enter"){ e.preventDefault(); const nx = inputs[i+1]; if (nx) nx.focus(); else { el.blur(); $("ketqua").scrollIntoView({behavior:"smooth"}); } }
 }));
